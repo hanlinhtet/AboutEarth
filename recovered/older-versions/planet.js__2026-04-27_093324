@@ -1,0 +1,113 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+export const planetData = {
+    Mercury: { radius: 0.4, distance: 10, color: 0xaaaaaa, speed: 0.04, desc: "Smallest planet.", model: null },
+    Venus:   { radius: 0.8, distance: 15, color: 0xe3bb76, speed: 0.03, desc: "Earth's sister.", model: null },
+    Earth:   { radius: 0.9, distance: 20, color: 0x2233ff, speed: 0.02, desc: "Our home.", model: 'models/earth.glb' },
+    Mars:    { radius: 0.7, distance: 25, color: 0xff4422, speed: 0.015, desc: "The Red Planet.", model: null },
+    // ... rest of your data
+};
+
+const loader = new GLTFLoader();
+
+// Custom Shader for Earth Day/Night
+const earthShader = {
+    uniforms: {
+        sunDirection: { value: new THREE.Vector3(1, 0, 0) },
+        dayTexture: { value: null },
+        nightTexture: { value: null }
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform sampler2D dayTexture;
+        uniform sampler2D nightTexture;
+        uniform vec3 sunDirection;
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        void main() {
+            vec3 dayColor = texture2D(dayTexture, vUv).rgb;
+            vec3 nightColor = texture2D(nightTexture, vUv).rgb;
+            
+            // Calculate light intensity
+            float intensity = dot(vNormal, sunDirection);
+            
+            // Smoothly mix day and night at the terminator line
+            float mixAmount = smoothstep(-0.15, 0.15, intensity);
+            vec3 finalColor = mix(nightColor, dayColor, mixAmount);
+            
+            gl_FragColor = vec4(finalColor, 1.0);
+        }
+    `
+};
+
+export class Planet {
+    constructor(scene, name, data) {
+        this.name = name;
+        this.radius = data.radius;
+        this.distance = data.distance;
+        this.speed = data.speed;
+        this.angle = Math.random() * Math.PI * 2;
+        this.desc = data.desc;
+
+        this.mesh = new THREE.Group();
+        this.mesh.userData.planet = this;
+
+        if (name === "Earth") {
+            this.initEarth();
+        } else {
+            // Placeholder for other planets
+            const geo = new THREE.SphereGeometry(data.radius, 32, 32);
+            const mat = new THREE.MeshStandardMaterial({ color: data.color });
+            this.mesh.add(new THREE.Mesh(geo, mat));
+        }
+
+        this.orbitGroup = new THREE.Group();
+        this.orbitGroup.add(this.mesh);
+        scene.add(this.orbitGroup);
+        this.mesh.position.x = data.distance;
+    }
+
+    initEarth() {
+        const texLoader = new THREE.TextureLoader();
+        
+        // IMPORTANT: Replace these with your actual image paths
+        const dayTex = texLoader.load('textures/earth_day.jpg');
+        const nightTex = texLoader.load('textures/earth_night.jpg');
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.clone(earthShader.uniforms),
+            vertexShader: earthShader.vertexShader,
+            fragmentShader: earthShader.fragmentShader
+        });
+
+        material.uniforms.dayTexture.value = dayTex;
+        material.uniforms.nightTexture.value = nightTex;
+
+        const geometry = new THREE.SphereGeometry(this.radius, 64, 64);
+        this.earthMesh = new THREE.Mesh(geometry, material);
+        this.mesh.add(this.earthMesh);
+    }
+
+    update() {
+        this.angle += this.speed;
+        this.orbitGroup.rotation.y = this.angle;
+        this.mesh.rotation.y += 0.005;
+
+        if (this.name === "Earth" && this.earthMesh) {
+            // Update the sun direction for the shader (Sun is at 0,0,0)
+            const worldPos = new THREE.Vector3();
+            this.earthMesh.getWorldPosition(worldPos);
+            const sunDir = worldPos.clone().negate().normalize();
+            this.earthMesh.material.uniforms.sunDirection.value.copy(sunDir);
+        }
+    }
+}

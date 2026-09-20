@@ -1,0 +1,67 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Sun } from './sun.js';
+import { planetData, Planet } from './planet.js';
+
+// Setup Scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 20, 50);
+
+// Add Starfield
+const starGeometry = new THREE.BufferGeometry();
+const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+const starVertices = [];
+for (let i = 0; i < 5000; i++) {
+    starVertices.push(THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000));
+}
+starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+const stars = new THREE.Points(starGeometry, starMaterial);
+scene.add(stars);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Setup Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enablePan = true;
+controls.screenSpacePanning = true;
+
+// ... (Rest of the file remains same, I will target the animation loop)
+
+function animate() {
+    requestAnimationFrame(animate);
+    sun.update();
+    
+    if (!focusedPlanet && !isSunFocused) {
+        planets.forEach(p => p.update());
+    } else {
+        if (focusedPlanet) focusedPlanet.mesh.rotation.y += 0.01;
+        if (isSunFocused) sun.mesh.rotation.y += 0.01;
+    }
+    
+    if (isTransitioning) {
+        const target = focusedPlanet ? focusedPlanet.mesh : sun.mesh;
+        const currentTargetPos = new THREE.Vector3();
+        target.getWorldPosition(currentTargetPos);
+        
+        // Cinematic glide to the planet
+        controls.target.lerp(currentTargetPos, 0.05);
+        camera.position.lerp(targetCameraPos, 0.05);
+        
+        if (camera.position.distanceTo(targetCameraPos) < 0.1) {
+            isTransitioning = false;
+        }
+    }
+    
+    controls.update();
+    renderer.render(scene, camera);
+}
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+animate();

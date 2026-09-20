@@ -1,0 +1,166 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    cursor: default;
+}
+
+canvas {
+    cursor: crosshair;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#search-container {
+    pointer-events: auto;
+    margin-bottom: 20px;
+}
+
+#planet-search {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: white;
+    width: 200px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#planet-search:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    width: 250px;
+}
+
+#search-results {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 5px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 200px;
+}
+
+.search-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+    pointer-events: auto;
+}
+
+.search-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#ui-layer h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: -1px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+#ui-layer p {
+    margin: 5px 0 20px 0;
+    font-size: 1.1rem;
+    max-width: 400px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#reset-view, #quality-toggle {
+    pointer-events: auto;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font: inherit;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s;
+}
+
+#reset-view:hover, #quality-toggle:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+#fps-readout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.85);
+    pointer-events: none;
+}
+
+#fps-readout.visible {
+    display: block;
+}
+
+#nav-arrows {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none; /* Hidden until focused */
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px 30px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+#nav-arrows.visible {
+    display: flex;
+}
+
+#nav-arrows button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    padding: 0 10px;
+}
+
+#nav-arrows button:hover {
+    transform: scale(1.2);
+    color: #4a90e2;
+}
+
+#current-nav-name {
+    font-size: 1.4rem;
+    font-weight: 500;
+    min-width: 120px;
+    text-align: center;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}

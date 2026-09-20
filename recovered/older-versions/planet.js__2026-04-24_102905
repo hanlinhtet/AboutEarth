@@ -1,0 +1,53 @@
+import * as THREE from 'three';
+
+// Data for each planet
+export const planetData = {
+    Mercury: { radius: 0.4, distance: 10, color: 0xaaaaaa, speed: 0.04, desc: "Smallest planet, closest to the Sun." },
+    Venus:   { radius: 0.8, distance: 15, color: 0xe3bb76, speed: 0.03, desc: "Hot, thick atmosphere, Earth's sister." },
+    Earth:   { radius: 0.9, distance: 20, color: 0x2233ff, speed: 0.02, desc: "Our home, the blue marble." },
+    Mars:    { radius: 0.7, distance: 25, color: 0xff4422, speed: 0.015, desc: "The Red Planet, home to Olympus Mons." },
+    Jupiter: { radius: 2.0, distance: 35, color: 0xd39c7e, speed: 0.01, desc: "Massive gas giant, largest in our system." },
+    Saturn:  { radius: 1.7, distance: 45, color: 0xc5ab6e, speed: 0.008, desc: "Famous for its stunning ring system." },
+    Uranus:  { radius: 1.2, distance: 55, color: 0xbbe1e4, speed: 0.006, desc: "Ice giant, rotates on its side." },
+    Neptune: { radius: 1.1, distance: 65, color: 0x6081ff, speed: 0.005, desc: "Cold, windy, blue ice giant." },
+    Pluto:   { radius: 0.2, distance: 75, color: 0x888888, speed: 0.004, desc: "Dwarf planet, located in the Kuiper belt." }
+};
+
+export class Planet {
+    constructor(scene, name) {
+        const data = planetData[name];
+        this.name = name;
+        this.desc = data.desc;
+        this.distance = data.distance;
+        this.speed = data.speed;
+        this.angle = Math.random() * Math.PI * 2;
+        
+        this.geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+        // Using MeshStandardMaterial for better PBR support
+        this.material = new THREE.MeshStandardMaterial({
+            color: data.color,
+            roughness: 0.6,     // lower = shinier
+            metalness: 0.2      // adds reflection feel
+        });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        
+        // Add point light near the planet to simulate local light and enhance volume
+        // const pointLight = new THREE.PointLight(0xffffff, 0.5, 50);
+        // this.mesh.add(pointLight);
+        
+        // Add scale property
+        this.mesh.scale.set(1, 1, 1);
+        
+        this.orbitGroup = new THREE.Group();
+        this.orbitGroup.add(this.mesh);
+        scene.add(this.orbitGroup);
+        
+        this.mesh.position.x = data.distance;
+    }
+    
+    update() {
+        this.angle += this.speed;
+        this.orbitGroup.rotation.y = this.angle;
+        this.mesh.rotation.y += 0.01;
+    }
+}

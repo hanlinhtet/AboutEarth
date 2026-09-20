@@ -1,0 +1,24 @@
+import * as THREE from 'three';
+
+export class Sun {
+    constructor(scene) {
+        this.geometry = new THREE.SphereGeometry(5, 64, 64);
+        this.material = new THREE.MeshStandardMaterial({
+            emissive: 0xffaa00,
+            emissiveIntensity: 2, // High intensity for bloom
+            color: 0xffdd00
+        });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        
+        // Sun Light
+        this.light = new THREE.PointLight(0xffffff, 100, 1000);
+        this.light.castShadow = true;
+        this.mesh.add(this.light);
+        
+        scene.add(this.mesh);
+    }
+    
+    update() {
+        this.mesh.rotation.y += 0.002;
+    }
+}

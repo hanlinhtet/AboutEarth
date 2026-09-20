@@ -1,0 +1,127 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Sun } from './sun.js';
+import { planetData, Planet } from './planet.js';
+
+// Setup Scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 20, 50);
+
+// Add Starfield
+const starGeometry = new THREE.BufferGeometry();
+const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+const starVertices = [];
+for (let i = 0; i < 5000; i++) {
+    starVertices.push(THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000));
+}
+starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+const stars = new THREE.Points(starGeometry, starMaterial);
+scene.add(stars);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0x404040);
+scene.add(ambientLight);
+
+// Add Sun
+const sun = new Sun(scene);
+
+// Add Planets
+const planets = Object.keys(planetData).map(name => new Planet(scene, name));
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let focusedPlanet = null;
+let isSunFocused = false;
+
+// Track interactivity
+window.addEventListener('mousemove', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects([...planets.map(p => p.mesh), sun.mesh]);
+    
+    renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : 'crosshair';
+});
+
+function onClick(event) {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects([...planets.map(p => p.mesh), sun.mesh]);
+    
+    if (intersects.length > 0) {
+        // Reset scale of all planets/sun first
+        planets.forEach(p => p.mesh.scale.set(1, 1, 1));
+        sun.mesh.scale.set(1, 1, 1);
+
+        if (intersects[0].object === sun.mesh) {
+            focusedPlanet = null;
+            isSunFocused = true;
+            sun.mesh.scale.set(1.5, 1.5, 1.5);
+            document.getElementById('planet-name').innerText = 'The Sun';
+            document.getElementById('planet-desc').innerText = 'The center of our solar system.';
+        } else {
+            focusedPlanet = planets.find(p => p.mesh === intersects[0].object);
+            isSunFocused = false;
+            focusedPlanet.mesh.scale.set(1.5, 1.5, 1.5);
+            document.getElementById('planet-name').innerText = focusedPlanet.name;
+            document.getElementById('planet-desc').innerText = focusedPlanet.desc;
+        }
+    }
+}
+
+window.addEventListener('click', onClick);
+
+document.getElementById('reset-view').addEventListener('click', () => {
+    focusedPlanet = null;
+    isSunFocused = false;
+    // Reset all scales
+    planets.forEach(p => p.mesh.scale.set(1, 1, 1));
+    sun.mesh.scale.set(1, 1, 1);
+    
+    document.getElementById('planet-name').innerText = 'Solar System';
+    document.getElementById('planet-desc').innerText = 'Click a planet to focus.';
+});
+
+// Animation Loop
+function animate() {
+    requestAnimationFrame(animate);
+    sun.update();
+    
+    // Orbit rotations pause when focused
+    if (!focusedPlanet && !isSunFocused) {
+        planets.forEach(p => p.update());
+    } else {
+        // Just spin the focused object
+        if (focusedPlanet) focusedPlanet.mesh.rotation.y += 0.01;
+        if (isSunFocused) sun.mesh.rotation.y += 0.01;
+    }
+    
+    if (focusedPlanet || isSunFocused) {
+        const target = focusedPlanet ? focusedPlanet.mesh : sun.mesh;
+        const targetPos = new THREE.Vector3();
+        target.getWorldPosition(targetPos);
+        
+        // Target focus
+        controls.target.lerp(targetPos, 0.1);
+    } else {
+        // Reset camera target smoothly to center
+        controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.1);
+    }
+    
+    controls.update();
+    renderer.render(scene, camera);
+}// Handle Window Resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+animate();

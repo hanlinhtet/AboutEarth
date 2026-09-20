@@ -1,0 +1,7 @@
+# 3D models are large binaries (the originals ran to ~300MB).
+# Keep them backed up OUTSIDE git - losing them is exactly what happened here.
+*.glb
+*.gltf
+
+# Scratch files
+*.tmp

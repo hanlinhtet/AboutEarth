@@ -1,0 +1,79 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+export const planetData = {
+    Mercury: { radius: 0.4, distance: 10, color: 0xaaaaaa, speed: 0.04, desc: "Smallest planet.", model: null },
+    Venus:   { radius: 0.8, distance: 15, color: 0xe3bb76, speed: 0.03, desc: "Earth's sister.", model: null },
+    Earth:   { radius: 0.9, distance: 20, color: 0x2233ff, speed: 0.02, desc: "Our home.", model: 'models/earth.glb' },
+    Mars:    { radius: 0.7, distance: 25, color: 0xff4422, speed: 0.015, desc: "The Red Planet.", model: null },
+    Jupiter: { radius: 2.0, distance: 35, color: 0xd39c7e, speed: 0.01, desc: "Massive gas giant, largest in our system." },
+    Saturn:  { radius: 1.7, distance: 45, color: 0xc5ab6e, speed: 0.008, desc: "Famous for its stunning ring system." },
+    Uranus:  { radius: 1.2, distance: 55, color: 0xbbe1e4, speed: 0.006, desc: "Ice giant, rotates on its side." },
+    Neptune: { radius: 1.1, distance: 65, color: 0x6081ff, speed: 0.005, desc: "Cold, windy, blue ice giant." },
+    Pluto:   { radius: 0.2, distance: 75, color: 0x888888, speed: 0.004, desc: "Dwarf planet, located in the Kuiper belt." }
+};
+
+const manager = new THREE.LoadingManager();
+
+manager.onStart = (url) => console.log('Started loading:', url);
+manager.onLoad = () => console.log('All models loaded! Ready to explore.');
+manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    console.log(`Loading file: ${url}. Loaded ${itemsLoaded}/${itemsTotal} files.`);
+};
+
+const loader = new GLTFLoader();
+
+export class Planet {
+    constructor(scene, name, data) {
+        this.name = name;
+        this.desc = data.desc;
+        this.distance = data.distance;
+        this.speed = data.speed;
+        this.radius = data.radius;
+        this.angle = Math.random() * Math.PI * 2;
+        
+        // 1. Create a placeholder group
+        this.mesh = new THREE.Group(); 
+        this.mesh.userData.planet = this;
+        
+        // 2. Add a temporary sphere so the planet isn't invisible while loading
+        const tempGeo = new THREE.SphereGeometry(data.radius, 32, 32);
+        const tempMat = new THREE.MeshStandardMaterial({ color: data.color });
+        this.placeholder = new THREE.Mesh(tempGeo, tempMat);
+        this.mesh.add(this.placeholder);
+
+        // 3. Load GLB if path exists
+        if (data.model) {
+            loader.load(
+                data.model, 
+                (gltf) => {
+                    console.log(`${this.name} model loaded successfully!`, gltf);
+                    this.mesh.remove(this.placeholder);
+                    const model = gltf.scene;
+                    model.scale.setScalar(data.radius); 
+                    this.mesh.add(model);
+                },
+                (xhr) => {
+                    // This logs the percentage progress
+                    console.log(`${this.name}: ${(xhr.loaded / xhr.total * 100)}% loaded`);
+                },
+                (error) => {
+                    // This tells you EXACTLY why it failed (usually a 404 Not Found)
+                    console.error(`Error loading ${this.name}:`, error);
+                }
+            );
+        }
+
+        this.orbitGroup = new THREE.Group();
+        this.orbitGroup.add(this.mesh);
+        scene.add(this.orbitGroup);
+        
+        this.mesh.position.x = data.distance;
+    }
+    
+    update() {
+        this.angle += this.speed;
+        this.orbitGroup.rotation.y = this.angle;
+        this.mesh.rotation.y += 0.01;
+    }
+}
