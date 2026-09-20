@@ -13,7 +13,7 @@ block module and `fetch` requests on `file://`).
 
 ```bash
 # Option 1 — Python (no install needed)
-python3 -m http.server 8000
+python3 -m http.server 8080
 
 # Option 2 — Node
 npx serve .
@@ -22,7 +22,12 @@ npx serve .
 # Right-click index.html → "Open with Live Server"
 ```
 
-Then open **http://localhost:8000**.
+Then open **http://localhost:8080**.
+
+> **`OSError: [Errno 98] Address already in use`** just means something else already
+> holds that port — it is not a problem with the project. Any free port works, so
+> pick another one: `python3 -m http.server 8090`. To see what is holding a port:
+> `ss -ltn | grep 8080`, or `docker ps` if you run containers.
 
 That's the whole setup. There is no build step, no bundler, and no `npm install` —
 Three.js is loaded from a CDN via the import map in `index.html`.
