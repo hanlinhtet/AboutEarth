@@ -78,19 +78,47 @@ canvas {
     color: rgba(255, 255, 255, 0.8);
 }
 
-#reset-view {
-    pointer-events: auto;
+#button-row {
+    display: flex;
+    gap: 10px;
     margin-top: 10px;
+}
+
+#reset-view, #quality-toggle {
+    pointer-events: auto;
     padding: 10px 20px;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.3);
     color: white;
     cursor: pointer;
     border-radius: 5px;
+    font: inherit;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s;
 }
 
-#reset-view:hover {
+#reset-view:hover, #quality-toggle:hover {
     background: rgba(255,255,255,0.2);
+}
+
+#fps-readout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.85);
+    pointer-events: none;
+}
+
+#fps-readout.visible {
+    display: block;
 }
 
 #nav-arrows {
