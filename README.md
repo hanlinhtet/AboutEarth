@@ -39,11 +39,16 @@ Three.js is loaded from a CDN via the import map in `index.html`.
 | Orbit the camera | Drag with the left mouse button |
 | Zoom | Scroll wheel |
 | Pan | Drag with the right mouse button |
-| Focus a planet | Click it, or type its name in the search box |
-| Next / previous body | `←` `→` arrow keys, or the on-screen arrows |
-| Back to the full system | `Esc`, or the "Return to Orbit" button |
-| Show FPS / draw calls / triangles | Press `F` |
+| Focus a planet | Click it, or search by name |
+| Jump to the search box | `/` |
+| Next / previous body | `←` `→`, or the on-screen pager |
+| Dismiss the panel | Click empty space, press `Esc`, or the `×` button |
+| Show FPS / draw calls / triangles | `F` |
 | Toggle bloom & resolution | The "Quality" button |
+
+Selecting a body opens a panel with its description and physical data —
+diameter, mass, orbital period, day length, moons, gravity and mean
+temperature. On a phone that panel docks to the bottom as a drawer instead.
 
 While a planet is focused the camera **follows** it along its orbit, so nothing
 ever freezes in place, and you can still drag to look around as it moves.

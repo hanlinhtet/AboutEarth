@@ -149,9 +149,6 @@ const pointer = new THREE.Vector2();
 /* UI                                                                  */
 /* ------------------------------------------------------------------ */
 
-const planetNameEl = document.getElementById('planet-name');
-const planetDescEl = document.getElementById('planet-desc');
-const resetBtn = document.getElementById('reset-view');
 const searchInput = document.getElementById('planet-search');
 const searchResults = document.getElementById('search-results');
 const navArrows = document.getElementById('nav-arrows');
@@ -160,32 +157,135 @@ const nextBtn = document.getElementById('next-planet');
 const currentNavName = document.getElementById('current-nav-name');
 const qualityBtn = document.getElementById('quality-toggle');
 const fpsEl = document.getElementById('fps-readout');
+const hintEl = document.getElementById('hint');
+
+const infoPanel = document.getElementById('info-panel');
+const infoClose = document.getElementById('info-close');
+const infoName = document.getElementById('info-name');
+const infoType = document.getElementById('info-type');
+const infoAbout = document.getElementById('info-about');
+const infoStats = document.getElementById('info-stats');
+
+// The Sun is focusable like a planet but isn't in planetData, so it carries
+// its own record in the same shape.
+const SUN_INFO = {
+    type: 'G2V main-sequence star',
+    about: 'The star at the centre of it all, holding 99.86% of the solar ' +
+           'system’s mass. Fusing 600 million tonnes of hydrogen into helium ' +
+           'every second, it has been burning for 4.6 billion years and has ' +
+           'roughly five billion left.',
+    stats: {
+        'Diameter': '1,392,700 km',
+        'Mass': '333,000 × Earth',
+        'Surface temperature': '5,500 °C',
+        'Core temperature': '15 million °C',
+        'Composition': '73% hydrogen, 25% helium',
+        'Age': '4.6 billion years',
+        'Rotation at equator': '25 Earth days',
+        'Light to Earth': '8 minutes 20 seconds'
+    }
+};
+
+const SWATCH = { Sun: '#ffb454' };
+for (const [name, d] of Object.entries(planetData)) {
+    SWATCH[name] = '#' + d.color.toString(16).padStart(6, '0');
+}
 
 const allFocusable = [
     { name: 'Sun', instance: sun, isSun: true },
     ...planets.map(p => ({ name: p.name, instance: p, isSun: false })),
 ];
 
-searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
+/* --- Search ------------------------------------------------------- */
+
+function renderSearch(term) {
     searchResults.innerHTML = '';
     if (!term) return;
 
-    allFocusable
-        .filter(item => item.name.toLowerCase().includes(term))
-        .forEach(match => {
-            const div = document.createElement('div');
-            div.className = 'search-item';
-            div.innerText = match.name;
-            div.addEventListener('click', () => {
-                if (match.isSun) focusSun();
-                else focusPlanet(match.instance);
-                searchInput.value = '';
-                searchResults.innerHTML = '';
-            });
-            searchResults.appendChild(div);
+    const matches = allFocusable.filter(i => i.name.toLowerCase().includes(term));
+    for (const match of matches) {
+        const row = document.createElement('div');
+        row.className = 'search-item';
+
+        const dot = document.createElement('span');
+        dot.className = 'search-dot';
+        dot.style.background = SWATCH[match.name] || '#888';
+
+        const label = document.createElement('span');
+        label.textContent = match.name;
+
+        const kind = document.createElement('span');
+        kind.className = 'search-kind';
+        kind.textContent = match.isSun ? 'Star' : (planetData[match.name]?.type || '');
+
+        row.append(dot, label, kind);
+        row.addEventListener('click', () => {
+            if (match.isSun) focusSun(); else focusPlanet(match.instance);
+            searchInput.value = '';
+            searchResults.innerHTML = '';
+            searchInput.blur();
         });
+        searchResults.appendChild(row);
+    }
+}
+
+searchInput.addEventListener('input', (e) => renderSearch(e.target.value.toLowerCase().trim()));
+
+// Enter picks the first match; Escape clears without deselecting the body.
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        searchResults.querySelector('.search-item')?.click();
+    } else if (e.key === 'Escape') {
+        searchInput.value = '';
+        searchResults.innerHTML = '';
+        searchInput.blur();
+        e.stopPropagation();
+    }
 });
+
+/* --- Info panel --------------------------------------------------- */
+
+function showInfo(name, record) {
+    infoName.textContent = name;
+    infoType.textContent = record.type || '';
+    infoAbout.textContent = record.about || record.desc || '';
+
+    infoStats.innerHTML = '';
+    for (const [key, value] of Object.entries(record.stats || {})) {
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+
+        const k = document.createElement('dt');
+        k.className = 'stat-key';
+        k.textContent = key;
+
+        const v = document.createElement('dd');
+        v.className = 'stat-val';
+        v.style.margin = '0';
+        v.textContent = value;
+
+        row.append(k, v);
+        infoStats.appendChild(row);
+    }
+
+    infoPanel.classList.add('open');
+    document.body.classList.add('panel-open');
+    hintEl.classList.add('hidden');
+    infoScrollToTop();
+}
+
+function infoScrollToTop() {
+    const scroller = document.getElementById('info-scroll');
+    if (scroller) scroller.scrollTop = 0;
+}
+
+function hideInfo() {
+    infoPanel.classList.remove('open');
+    document.body.classList.remove('panel-open');
+    hintEl.classList.remove('hidden');
+}
+
+infoClose.addEventListener('click', deselect);
 
 function updateNavUI() {
     if (focusTarget) {
@@ -245,7 +345,13 @@ renderer.domElement.addEventListener('pointerup', (e) => {
     raycaster.setFromCamera(pointer, camera);
 
     const hits = raycaster.intersectObjects(pickables, true);
-    if (hits.length === 0) return;
+
+    // Clicking empty space dismisses the current selection - the same gesture
+    // people already expect from a lightbox or a drawer.
+    if (hits.length === 0) {
+        deselect();
+        return;
+    }
 
     let object = hits[0].object;
     if (object.userData.sun || object === sun.mesh) {
@@ -264,42 +370,45 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 /* Focus transitions                                                   */
 /* ------------------------------------------------------------------ */
 
-function beginFocus(object3D, radius, name, title, desc) {
+function beginFocus(object3D, radius, name, record) {
     focusTarget = { object3D, radius, name };
     isTransitioning = true;
-    planetNameEl.innerText = title;
-    planetDescEl.innerText = desc;
 
     object3D.getWorldPosition(prevFocusWorldPos);
+    showInfo(name, record);
     updateNavUI();
 }
 
 function focusPlanet(planet) {
     if (!planet.mesh) return;
-    beginFocus(planet.mesh, planet.radius, planet.name, planet.name, planet.desc);
+    beginFocus(planet.mesh, planet.radius, planet.name, planetData[planet.name] || {});
 }
 
 function focusSun() {
-    beginFocus(sun.mesh, sun.radius, 'Sun', 'The Sun',
-        'Center of our Solar System, provider of life.');
+    beginFocus(sun.mesh, sun.radius, 'Sun', SUN_INFO);
 }
 
-resetBtn.addEventListener('click', () => {
+/** Clear the selection and pull the camera back out to the whole system. */
+function deselect() {
+    if (!focusTarget) return;
     focusTarget = null;
     isTransitioning = true;
-    planetNameEl.innerText = 'Solar System';
-    planetDescEl.innerText = 'Click a planet to focus.';
     desiredCamPos.set(0, 30, 72);
+    hideInfo();
     updateNavUI();
-});
+}
 
 window.addEventListener('keydown', (e) => {
     if (e.target === searchInput) return;
     if (e.key === 'ArrowLeft') navigate(-1);
     else if (e.key === 'ArrowRight') navigate(1);
-    else if (e.key === 'Escape') resetBtn.click();
+    else if (e.key === 'Escape') deselect();
     else if (e.key === 'f' || e.key === 'F') {
-        if (fpsEl) fpsEl.classList.toggle('visible');
+        fpsEl?.classList.toggle('visible');
+    } else if (e.key === '/') {
+        // Jump straight to search, the way most apps bind it.
+        e.preventDefault();
+        searchInput.focus();
     }
 });
 

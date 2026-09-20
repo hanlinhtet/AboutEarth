@@ -1,166 +1,466 @@
-body, html {
+/* ------------------------------------------------------------------ */
+/* Tokens                                                              */
+/* ------------------------------------------------------------------ */
+
+:root {
+    --panel:        rgba(10, 14, 22, 0.72);
+    --panel-solid:  rgba(10, 14, 22, 0.92);
+    --edge:         rgba(255, 255, 255, 0.10);
+    --edge-strong:  rgba(255, 255, 255, 0.20);
+    --text:         rgba(255, 255, 255, 0.95);
+    --text-dim:     rgba(255, 255, 255, 0.62);
+    --text-faint:   rgba(255, 255, 255, 0.40);
+    --accent:       #ffb454;
+
+    --radius:       12px;
+    --blur:         blur(18px) saturate(140%);
+    --ease:         cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #000;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
-    cursor: default;
+    background: #000;
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-canvas {
-    cursor: crosshair;
-}
+canvas { display: block; }
 
-#ui-layer {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    pointer-events: none;
+/* Every HUD layer floats over the canvas but stays click-through unless a
+   control explicitly opts back in. Without this, invisible containers would
+   swallow drags meant for the camera. */
+#hud-top-left,
+#hud-top-right,
+#nav-arrows,
+#hint {
+    position: fixed;
     z-index: 10;
+    pointer-events: none;
+}
+
+#hud-top-left > *,
+#hud-top-right > *,
+#nav-arrows button,
+#search-container {
+    pointer-events: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Brand + search                                                      */
+/* ------------------------------------------------------------------ */
+
+#hud-top-left {
+    top: 24px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#brand-mark {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px 2px rgba(255, 180, 84, 0.6);
+}
+
+#brand-text {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
 }
 
 #search-container {
-    pointer-events: auto;
-    margin-bottom: 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#search-icon {
+    position: absolute;
+    left: 13px;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: var(--text-faint);
+    stroke-width: 2;
+    stroke-linecap: round;
+    pointer-events: none;
+    transition: stroke 0.2s;
 }
 
 #planet-search {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 15px;
-    border-radius: 20px;
-    color: white;
-    width: 200px;
+    width: 210px;
+    padding: 10px 14px 10px 36px;
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.875rem;
     outline: none;
-    transition: all 0.3s ease;
+    transition: border-color 0.2s, background 0.2s, width 0.3s var(--ease);
 }
+
+#planet-search::placeholder { color: var(--text-faint); }
 
 #planet-search:focus {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.6);
-    width: 250px;
+    width: 260px;
+    border-color: var(--edge-strong);
+    background: var(--panel-solid);
 }
+
+#search-container:focus-within #search-icon { stroke: var(--text-dim); }
 
 #search-results {
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 5px;
-    margin-top: 5px;
-    max-height: 200px;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    max-height: 260px;
     overflow-y: auto;
-    width: 200px;
+    background: var(--panel-solid);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius);
+    overflow-x: hidden;
 }
+
+#search-results:empty { display: none; }
 
 .search-item {
-    padding: 8px 15px;
-    cursor: pointer;
-    transition: background 0.2s;
-    pointer-events: auto;
-}
-
-.search-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-#ui-layer h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 300;
-    letter-spacing: -1px;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-
-#ui-layer p {
-    margin: 5px 0 20px 0;
-    font-size: 1.1rem;
-    max-width: 400px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-#button-row {
     display: flex;
+    align-items: center;
     gap: 10px;
-    margin-top: 10px;
-}
-
-#reset-view, #quality-toggle {
-    pointer-events: auto;
-    padding: 10px 20px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
+    padding: 10px 14px;
+    font-size: 0.875rem;
     cursor: pointer;
-    border-radius: 5px;
-    font: inherit;
-    backdrop-filter: blur(6px);
-    transition: background 0.2s;
+    transition: background 0.15s;
 }
 
-#reset-view:hover, #quality-toggle:hover {
-    background: rgba(255,255,255,0.2);
+.search-item:hover,
+.search-item.active { background: rgba(255, 255, 255, 0.07); }
+
+.search-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.search-kind {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--text-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Top-right controls                                                  */
+/* ------------------------------------------------------------------ */
+
+#hud-top-right {
+    top: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+#quality-toggle {
+    padding: 9px 16px;
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+#quality-toggle:hover {
+    color: var(--text);
+    border-color: var(--edge-strong);
 }
 
 #fps-readout {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 10;
     display: none;
     padding: 6px 12px;
-    border-radius: 5px;
-    background: rgba(0,0,0,0.55);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.85);
-    pointer-events: none;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    white-space: nowrap;
 }
 
-#fps-readout.visible {
-    display: block;
+#fps-readout.visible { display: block; }
+
+/* ------------------------------------------------------------------ */
+/* Info panel                                                          */
+/* ------------------------------------------------------------------ */
+
+#info-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 20;
+    width: 370px;
+    max-width: 88vw;
+    height: 100%;
+    background: var(--panel-solid);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-left: 1px solid var(--edge);
+
+    /* Parked off-canvas and inert until a body is focused. visibility (not
+       display) keeps the slide transition alive in both directions. */
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.45s var(--ease), visibility 0.45s;
 }
+
+#info-panel.open {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+#info-scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding: 88px 32px 40px;
+}
+
+#info-close {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 1;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--edge);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+#info-close svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: var(--text-dim);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+#info-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: rotate(90deg);
+}
+
+#info-close:hover svg { stroke: var(--text); }
+
+#info-type {
+    margin: 0 0 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+#info-name {
+    margin: 0 0 18px;
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+}
+
+#info-about {
+    margin: 0 0 28px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+}
+
+#info-stats {
+    margin: 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--edge);
+}
+
+.stat-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-key {
+    font-size: 0.8rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+.stat-val {
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bottom navigation                                                   */
+/* ------------------------------------------------------------------ */
 
 #nav-arrows {
-    position: absolute;
-    bottom: 40px;
+    bottom: 32px;
     left: 50%;
-    transform: translateX(-50%);
-    display: none; /* Hidden until focused */
+    transform: translateX(-50%) translateY(14px);
+    display: flex;
     align-items: center;
-    gap: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 15px 30px;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    z-index: 10;
-    backdrop-filter: blur(10px);
+    gap: 6px;
+    padding: 7px;
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, transform 0.3s var(--ease), visibility 0.3s;
 }
 
 #nav-arrows.visible {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* With the drawer open the canvas is only the area left of it, so centre the
+   pager on *that*, not on the window. Half the panel width. */
+body.panel-open #nav-arrows.visible {
+    transform: translateX(calc(-50% - 185px)) translateY(0);
 }
 
 #nav-arrows button {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
     background: none;
     border: none;
-    color: white;
-    font-size: 1.5rem;
+    border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.2s;
-    padding: 0 10px;
+    transition: background 0.2s;
 }
 
-#nav-arrows button:hover {
-    transform: scale(1.2);
-    color: #4a90e2;
+#nav-arrows button svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: var(--text-dim);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.2s;
 }
+
+#nav-arrows button:hover { background: rgba(255, 255, 255, 0.08); }
+#nav-arrows button:hover svg { stroke: var(--text); }
 
 #current-nav-name {
-    font-size: 1.4rem;
-    font-weight: 500;
-    min-width: 120px;
+    min-width: 128px;
+    padding: 0 6px;
     text-align: center;
-    letter-spacing: 2px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hint                                                                */
+/* ------------------------------------------------------------------ */
+
+#hint {
+    bottom: 28px;
+    left: 24px;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    transition: opacity 0.3s;
+}
+
+#hint.hidden { opacity: 0; }
+
+/* ------------------------------------------------------------------ */
+/* Small screens                                                       */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+    #hud-top-left, #hud-top-right { top: 16px; }
+    #hud-top-left { left: 16px; }
+    #hud-top-right { right: 16px; }
+
+    #planet-search { width: 160px; }
+    #planet-search:focus { width: 190px; }
+
+    /* A side drawer is wrong on a phone - dock it to the bottom instead. */
+    #info-panel {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 62vh;
+        border-left: none;
+        border-top: 1px solid var(--edge);
+        border-radius: 18px 18px 0 0;
+        transform: translateY(100%);
+    }
+
+    #info-panel.open { transform: translateY(0); }
+
+    #info-scroll { padding: 70px 22px 32px; }
+    #info-name { font-size: 1.9rem; }
+
+    /* Keep the pager clear of the drawer. The panel is docked to the bottom
+       here, not the side, so the desktop horizontal offset must not apply. */
+    #nav-arrows { bottom: auto; top: 76px; }
+    body.panel-open #nav-arrows.visible { transform: translateX(-50%) translateY(0); }
+    #hint { display: none; }
 }

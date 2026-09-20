@@ -12,7 +12,19 @@ export const planetData = {
         desc: "Smallest planet.",
         isTextured: true,
         dayTex: 'https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar/2023/09/p/i/a/1/PIA17386.jpg?w=4096&h=2048&fit=clip&crop=faces%2Cfocalpoint',
-        rimColor: new THREE.Vector3(0.7, 0.7, 0.7)
+        rimColor: new THREE.Vector3(0.7, 0.7, 0.7),
+        type: 'Terrestrial planet',
+        about: "The smallest planet and the closest to the Sun. Mercury has almost no atmosphere to trap heat, so it swings between scorching days and freezing nights — the most extreme temperature range of any planet.",
+        stats: {
+            'Diameter': '4,879 km',
+            'Mass': '0.055 × Earth',
+            'Distance from Sun': '57.9 million km',
+            'Orbital period': '88 Earth days',
+            'Day length': '176 Earth days',
+            'Moons': 'None',
+            'Gravity': '3.7 m/s²',
+            'Mean temperature': '167 °C'
+        }
     },
     Venus:   {
         radius: 0.8,
@@ -24,7 +36,19 @@ export const planetData = {
         desc: "Earth's sister.",
         isTextured: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Solarsystemscope_texture_8k_venus_surface.jpg',
-        rimColor: new THREE.Vector3(0.9, 0.8, 0.6)
+        rimColor: new THREE.Vector3(0.9, 0.8, 0.6),
+        type: 'Terrestrial planet',
+        about: "Earth's twin in size, but a runaway greenhouse effect has made it the hottest planet in the solar system - hotter even than Mercury. Its thick carbon dioxide atmosphere crushes down at 90 times Earth's pressure, and it spins backwards.",
+        stats: {
+            'Diameter': '12,104 km',
+            'Mass': '0.815 × Earth',
+            'Distance from Sun': '108.2 million km',
+            'Orbital period': '225 Earth days',
+            'Day length': '117 Earth days',
+            'Moons': 'None',
+            'Gravity': '8.9 m/s²',
+            'Mean temperature': '464 °C'
+        }
     },
     Earth:   {
         radius: 0.9,
@@ -37,7 +61,19 @@ export const planetData = {
         isEarth: true,
         dayTex: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
         nightTex: 'https://unpkg.com/three-globe/example/img/earth-night.jpg',
-        rimColor: new THREE.Vector3(0.3, 0.6, 1.0)
+        rimColor: new THREE.Vector3(0.3, 0.6, 1.0),
+        type: 'Terrestrial planet',
+        about: "The only world known to harbour life. Liquid water covers 71% of its surface, and a nitrogen-oxygen atmosphere shields it from radiation while keeping temperatures stable enough for that water to stay liquid.",
+        stats: {
+            'Diameter': '12,756 km',
+            'Mass': '5.97 × 10²⁴ kg',
+            'Distance from Sun': '149.6 million km',
+            'Orbital period': '365.25 days',
+            'Day length': '24 hours',
+            'Moons': '1',
+            'Gravity': '9.8 m/s²',
+            'Mean temperature': '15 °C'
+        }
     },
     Mars:    {
         radius: 0.7,
@@ -49,7 +85,19 @@ export const planetData = {
         desc: "The Red Planet.",
         isMars: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Mars_%284997052786%29.jpg',
-        rimColor: new THREE.Vector3(1.0, 0.4, 0.2)
+        rimColor: new THREE.Vector3(1.0, 0.4, 0.2),
+        type: 'Terrestrial planet',
+        about: "The Red Planet owes its colour to iron oxide dust. It hosts the tallest volcano and one of the deepest canyons in the solar system, and its polar ice caps and dry riverbeds point to a far wetter past.",
+        stats: {
+            'Diameter': '6,792 km',
+            'Mass': '0.107 × Earth',
+            'Distance from Sun': '228 million km',
+            'Orbital period': '687 Earth days',
+            'Day length': '24.7 hours',
+            'Moons': '2 — Phobos, Deimos',
+            'Gravity': '3.7 m/s²',
+            'Mean temperature': '−65 °C'
+        }
     },
     Jupiter: {
         radius: 2.0,
@@ -61,7 +109,19 @@ export const planetData = {
         desc: "Massive gas giant, largest in our system.",
         isTextured: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/b/be/Solarsystemscope_texture_2k_jupiter.jpg',
-        rimColor: new THREE.Vector3(0.8, 0.7, 0.6)
+        rimColor: new THREE.Vector3(0.8, 0.7, 0.6),
+        type: 'Gas giant',
+        about: "More massive than every other planet combined. Jupiter has no solid surface - just deepening layers of hydrogen and helium. The Great Red Spot is a storm wider than Earth that has raged for centuries.",
+        stats: {
+            'Diameter': '142,984 km',
+            'Mass': '317.8 × Earth',
+            'Distance from Sun': '778.5 million km',
+            'Orbital period': '11.9 Earth years',
+            'Day length': '9.9 hours',
+            'Moons': '95 confirmed',
+            'Gravity': '23.1 m/s²',
+            'Mean temperature': '−110 °C'
+        }
     },
     Saturn:  {
         radius: 1.7,
@@ -74,7 +134,19 @@ export const planetData = {
         isTextured: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Solarsystemscope_texture_8k_saturn.jpg',
         hasRings: true,
-        rimColor: new THREE.Vector3(0.8, 0.7, 0.5)
+        rimColor: new THREE.Vector3(0.8, 0.7, 0.5),
+        type: 'Gas giant',
+        about: "Famous for the brightest ring system in the solar system - countless particles of ice and rock, most no bigger than a house, spread across a disc barely tens of metres thick. Saturn is less dense than water.",
+        stats: {
+            'Diameter': '120,536 km',
+            'Mass': '95.2 × Earth',
+            'Distance from Sun': '1.43 billion km',
+            'Orbital period': '29.4 Earth years',
+            'Day length': '10.7 hours',
+            'Moons': '146 confirmed',
+            'Gravity': '9.0 m/s²',
+            'Mean temperature': '−140 °C'
+        }
     },
     Uranus:  {
         radius: 1.2,
@@ -86,7 +158,19 @@ export const planetData = {
         desc: "Ice giant, rotates on its side.",
         isTextured: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Solarsystemscope_texture_2k_uranus.jpg',
-        rimColor: new THREE.Vector3(0.6, 0.8, 0.9)
+        rimColor: new THREE.Vector3(0.6, 0.8, 0.9),
+        type: 'Ice giant',
+        about: "Uranus orbits on its side, tipped 98° - most likely knocked over by an ancient collision. That extreme tilt gives each pole a 42-year day followed by a 42-year night. Methane in its atmosphere gives it a pale cyan colour.",
+        stats: {
+            'Diameter': '51,118 km',
+            'Mass': '14.5 × Earth',
+            'Distance from Sun': '2.87 billion km',
+            'Orbital period': '84 Earth years',
+            'Day length': '17.2 hours',
+            'Moons': '28 confirmed',
+            'Gravity': '8.7 m/s²',
+            'Mean temperature': '−195 °C'
+        }
     },
     Neptune: {
         radius: 1.1,
@@ -98,7 +182,19 @@ export const planetData = {
         desc: "Cold, windy, blue ice giant.",
         isTextured: true,
         dayTex: 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Solarsystemscope_texture_2k_neptune.jpg',
-        rimColor: new THREE.Vector3(0.4, 0.5, 0.9)
+        rimColor: new THREE.Vector3(0.4, 0.5, 0.9),
+        type: 'Ice giant',
+        about: "The most distant planet, and the windiest - supersonic gales reach 2,000 km/h. Neptune was found by mathematics before anyone saw it, predicted from irregularities in the orbit of Uranus.",
+        stats: {
+            'Diameter': '49,528 km',
+            'Mass': '17.1 × Earth',
+            'Distance from Sun': '4.5 billion km',
+            'Orbital period': '164.8 Earth years',
+            'Day length': '16.1 hours',
+            'Moons': '16 confirmed',
+            'Gravity': '11.0 m/s²',
+            'Mean temperature': '−200 °C'
+        }
     },
     Pluto:   {
         radius: 0.2,
@@ -110,7 +206,19 @@ export const planetData = {
         desc: "Dwarf planet, located in the Kuiper belt.",
         isTextured: true,
         dayTex: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7117654f-5f91-4761-bde0-727b9abb0112/di7sqt5-6e5aaf23-ba34-48aa-8c2a-31eb5d9e8615.png/v1/fill/w_1264,h_632,q_70,strp/pluto_texture_map__fixed_blur___unmaped_areas__by_4stron4omi4_di7sqt5-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NjQwIiwicGF0aCI6Ii9mLzcxMTc2NTRmLTVmOTEtNDc2MS1iZGUwLTcyN2I5YWJiMDExMi9kaTdzcXQ1LTZlNWFhZjIzLWJhMzQtNDhhYS04YzJhLTMxZWI1ZDllODYxNS5wbmciLCJ3aWR0aCI6Ijw9MTI4MCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.2ZqKkITp3qZg77C-0-ff-cWuvaADPwq82nCx2Bu39mA',
-        rimColor: new THREE.Vector3(0.6, 0.6, 0.6)
+        rimColor: new THREE.Vector3(0.6, 0.6, 0.6),
+        type: 'Dwarf planet',
+        about: "Reclassified as a dwarf planet in 2006 because it shares its orbital neighbourhood with other Kuiper Belt objects. Its orbit is so elliptical that it sometimes passes closer to the Sun than Neptune.",
+        stats: {
+            'Diameter': '2,376 km',
+            'Mass': '0.0022 × Earth',
+            'Distance from Sun': '5.9 billion km',
+            'Orbital period': '248 Earth years',
+            'Day length': '153 hours',
+            'Moons': '5 — incl. Charon',
+            'Gravity': '0.7 m/s²',
+            'Mean temperature': '−225 °C'
+        }
     }
 };
 

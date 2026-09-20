@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AboutEarth - Solar System</title>
+    <title>AboutEarth — Solar System</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Load Three.js and Post-processing from CDN -->
     <script type="importmap">
         {
             "imports": {
@@ -16,26 +15,58 @@
     </script>
 </head>
 <body>
-    <div id="ui-layer">
+    <!-- Top left: identity + search -->
+    <header id="hud-top-left">
+        <div id="brand">
+            <span id="brand-mark"></span>
+            <span id="brand-text">Solar System</span>
+        </div>
         <div id="search-container">
-            <input type="text" id="planet-search" placeholder="Search planet..." autocomplete="off">
-            <div id="search-results"></div>
+            <svg id="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+            </svg>
+            <input type="text" id="planet-search" placeholder="Search…" autocomplete="off" spellcheck="false">
+            <div id="search-results" role="listbox"></div>
         </div>
-        <h1 id="planet-name">Solar System</h1>
-        <p id="planet-desc">Click a planet to focus.</p>
-        <div id="button-row">
-            <button id="reset-view">Return to Orbit</button>
-            <button id="quality-toggle">Quality: High</button>
-        </div>
+    </header>
+
+    <!-- Top right: controls -->
+    <div id="hud-top-right">
+        <button id="quality-toggle" title="Toggle bloom and render resolution">Quality: High</button>
+        <div id="fps-readout"></div>
     </div>
 
-    <div id="fps-readout"></div>
+    <!-- Right: planet information -->
+    <aside id="info-panel" aria-live="polite">
+        <button id="info-close" title="Close (Esc)" aria-label="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+            </svg>
+        </button>
 
-    <div id="nav-arrows">
-        <button id="prev-planet">&lt;&lt;</button>
+        <div id="info-scroll">
+            <p id="info-type"></p>
+            <h2 id="info-name"></h2>
+            <p id="info-about"></p>
+            <dl id="info-stats"></dl>
+        </div>
+    </aside>
+
+    <!-- Bottom: step between bodies -->
+    <nav id="nav-arrows">
+        <button id="prev-planet" aria-label="Previous body">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15,5 8,12 15,19"></polyline></svg>
+        </button>
         <span id="current-nav-name">Planet</span>
-        <button id="next-planet">&gt;&gt;</button>
-    </div>
+        <button id="next-planet" aria-label="Next body">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9,5 16,12 9,19"></polyline></svg>
+        </button>
+    </nav>
+
+    <!-- Bottom left: contextual hint -->
+    <p id="hint">Click a planet to explore · drag to orbit · scroll to zoom</p>
 
     <script type="module" src="main.js"></script>
 </body>
